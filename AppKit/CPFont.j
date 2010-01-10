@@ -21,9 +21,8 @@
  */
 
 var _CPFonts                = {},
-    _CPFontSystemFontFace   = @"Arial, sans-serif",
+    _CPFontSystemFontFace   = @"Lucida Grande"; //Arial, sans-serif",
     _CPWrapRegExp           = new RegExp("\\s*,\\s*", "g");
-
 
 #define _CPCreateCSSString(aName, aSize, isBold) (isBold ? @"bold " : @"") + ROUND(aSize) + @"px " + ((aName === _CPFontSystemFontFace) ? aName : (@"\"" + aName.replace(_CPWrapRegExp, '", "') + @"\", " + _CPFontSystemFontFace))
 #define _CPCachedFont(aName, aSize, isBold) _CPFonts[_CPCreateCSSString(aName, aSize, isBold)]
