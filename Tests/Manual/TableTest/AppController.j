@@ -22,7 +22,7 @@ CPLogRegister(CPLogConsole);
     dataSet1 = [],
     dataSet2 = [];
     
-    for(var i = 1; i < 100; i++)
+    for(var i = 1; i < 500000; i++)
     {
         dataSet1[i - 1] = i;
         dataSet2[i - 1] = i + 10;
@@ -39,6 +39,7 @@ CPLogRegister(CPLogConsole);
     [tableView setAllowsMultipleSelection:YES];
     [tableView setAllowsColumnSelection:YES];
     [tableView setUsesAlternatingRowBackgroundColors:YES];
+    [tableView setAlternatingRowBackgroundColors:[[CPColor whiteColor], [CPColor colorWithHexString:@"e4e7ff"], [CPColor colorWithHexString:@"f4e7ff"]]];
     [tableView setGridStyleMask:CPTableViewSolidHorizontalGridLineMask | CPTableViewSolidVerticalGridLineMask];
 
 //    [tableView setBackgroundColor:[CPColor blueColor]];
@@ -74,8 +75,6 @@ CPLogRegister(CPLogConsole);
         var column = [[CPTableColumn alloc] initWithIdentifier:String(i)];
 
         [[column headerView] setStringValue:"Number "+i];
-        [[column headerView] sizeToFit];
-        //[column setWidth:[[column headerView] frame].size.width + 20];
 
         [column setWidth:200.0];
         [column setMinWidth:150.0];
@@ -159,8 +158,6 @@ CPLogRegister(CPLogConsole);
         var column = [[CPTableColumn alloc] initWithIdentifier:String(i)];
 
         [[column headerView] setStringValue:"Number "+i];
-        [[column headerView] sizeToFit];
-        //[column setWidth:[[column headerView] frame].size.width + 20];
 
         [column setWidth:200.0];
         [column setMinWidth:150.0];
