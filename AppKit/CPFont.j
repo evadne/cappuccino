@@ -66,6 +66,17 @@ var _CPFonts                = {},
 }
 
 /*!
+    Sets the system font
+    @param aName
+*/
++ (CPFont)setSystemFontString:(CPString)aName
+{
+    _CPFontSystemFontFace = aName;
+    _CPFonts = {};	// Clears cache object
+}
+
+
+/*!
     Returns the system font scaled to the specified size
     @param aSize the size of the font (in points)
     @return the requested system font
