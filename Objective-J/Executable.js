@@ -137,6 +137,7 @@ Executable.prototype.execute = function()
 #endif
     var oldContextBundle = CONTEXT_BUNDLE;
 
+    // FIXME: Should we have stored this?
     CONTEXT_BUNDLE = CFBundle.bundleContainingURL(this.URL());
 
     var result = this._function.apply(global, this.functionArguments());
@@ -280,15 +281,18 @@ function fileExecutableSearchFinished(/*FileExecutable*/ aFileExecutable)
 
 function fileExecutableDependencyLoadFinished()
 {
-    var index = 0,
-        count = fileDependencyExecutables.length;
+    var executables = fileDependencyExecutables,
+        index = 0,
+        count = executables.length;
+
+    fileDependencyExecutables = [];
 
     for (; index < count; ++index)
-        fileDependencyExecutables[index]._fileDependencyStatus = ExecutableLoadedFileDependencies;
+        executables[index]._fileDependencyStatus = ExecutableLoadedFileDependencies;
 
     for (index = 0; index < count; ++index)
     {
-        var executable = fileDependencyExecutables[index],
+        var executable = executables[index],
             callbacks = executable._fileDependencyCallbacks,
             callbackIndex = 0,
             callbackCount = callbacks.length;
