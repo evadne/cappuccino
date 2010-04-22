@@ -34,6 +34,8 @@ var TOKEN_ACCESSORS         = "accessors",
     TOKEN_SUPER             = "super",
     TOKEN_VAR               = "var",
     TOKEN_IN                = "in",
+    TOKEN_PRAGMA            = "pragma",
+    TOKEN_MARK              = "mark",
 
     TOKEN_EQUAL             = '=',
     TOKEN_PLUS              = '+',
@@ -50,6 +52,7 @@ var TOKEN_ACCESSORS         = "accessors",
     TOKEN_OPEN_BRACKET      = '[',
     TOKEN_DOUBLE_QUOTE      = '"',
     TOKEN_PREPROCESSOR      = '@',
+    TOKEN_HASH              = '#',
     TOKEN_CLOSE_BRACKET     = ']',
     TOKEN_QUESTION_MARK     = '?',
     TOKEN_OPEN_PARENTHESIS  = '(',
@@ -363,6 +366,29 @@ Preprocessor.prototype.directive = function(tokens, aStringBuffer, allowedDirect
         return buffer;
 }
 
+Preprocessor.prototype.hash = function(tokens, aStringBuffer)
+{
+    // Grab the next token, C preprocessor directives follow '#' immediately.
+    var buffer = aStringBuffer ? aStringBuffer : new StringBuffer(),
+        token = tokens.next();
+
+    // #pragma (C Preprocessor directive)
+    if (token === TOKEN_PRAGMA)
+    {
+        token = tokens.skip_whitespace();
+        
+        // '#pragma mark' directive is used in Xcode editor for creating labels,
+        // which is irrelevant to Cappuccino - just swallow this line
+        if (token === TOKEN_MARK)
+        {
+            while ((token = tokens.next()).indexOf("\n") < 0);
+        }
+    }
+    // if not a #pragma directive, it should not be processed here
+    else
+        throw new SyntaxError(this.error_message("*** Expected \"pragma\" to follow # but instead saw \"" + token + "\"."));
+}
+
 Preprocessor.prototype.implementation = function(tokens, /*StringBuffer*/ aStringBuffer)
 {
     var buffer = aStringBuffer,
@@ -542,6 +568,11 @@ Preprocessor.prototype.implementation = function(tokens, /*StringBuffer*/ aStrin
             
             CONCAT(instance_methods, this.method(tokens, ivar_names));
         }
+        // If we reach a # symbol, we may be at a C preprocessor directive.
+        else if (token == TOKEN_HASH)
+        {
+            this.hash(tokens, buffer);
+        }
         // Check if we've reached @end...
         else if (token == TOKEN_PREPROCESSOR)
         {
@@ -612,7 +643,7 @@ Preprocessor.prototype.method = function(/*Lexer*/ tokens, ivar_names)
 
     ivar_names = ivar_names || {};
 
-    while((token = tokens.skip_whitespace()) && token != TOKEN_OPEN_BRACE)
+    while((token = tokens.skip_whitespace()) && token !== TOKEN_OPEN_BRACE && token !== TOKEN_SEMICOLON)
     {
         if (token == TOKEN_COLON)
         {
@@ -664,6 +695,16 @@ Preprocessor.prototype.method = function(/*Lexer*/ tokens, ivar_names)
         // Build selector name.
         else
             selector += token;
+    }
+
+    if (token === TOKEN_SEMICOLON)
+    {
+        token = tokens.skip_whitespace();
+        if (token !== TOKEN_OPEN_BRACE)
+        {
+            throw new SyntaxError(this.error_message("Invalid semi-colon in method declaration. "+
+            "Semi-colons are allowed only to terminate the method signature, before the open brace."));
+        }
     }
 
     var index = 0,
@@ -886,6 +927,10 @@ Preprocessor.prototype.preprocess = function(tokens, /*StringBuffer*/ aStringBuf
         // If we reach an @ symbol, we are at a preprocessor directive.
         else if (token == TOKEN_PREPROCESSOR)
             this.directive(tokens, buffer);
+            
+        // If we reach a # symbol, we may be at a C preprocessor directive.
+        else if (token == TOKEN_HASH)
+            this.hash(tokens, buffer);
         
         // If we reach a bracket, we will either be preprocessing a message send, a literal 
         // array, or an array index.

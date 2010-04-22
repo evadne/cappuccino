@@ -139,6 +139,7 @@ var CPViewFlags                     = { },
     
     BOOL                _isHidden;
     BOOL                _hitTests;
+    BOOL                _clipsToBounds;
     
     BOOL                _postsFrameChangedNotifications;
     BOOL                _postsBoundsChangedNotifications;
@@ -243,6 +244,11 @@ var CPViewFlags                     = { },
     return [CPSet setWithObjects:@"boundsOrigin", @"boundsSize"];
 }
 
++ (CPMenu)defaultMenu
+{
+    return nil;
+}
+
 - (id)init
 {
     return [self initWithFrame:CGRectMakeZero()];
@@ -272,6 +278,7 @@ var CPViewFlags                     = { },
 
         _autoresizingMask = CPViewNotSizable;
         _autoresizesSubviews = YES;
+        _clipsToBounds = YES;
     
         _opacity = 1.0;
         _isHidden = NO;
@@ -668,7 +675,7 @@ var CPViewFlags                     = { },
     return _tag;
 }
 
-- (void)viewWithTag:(CPInteger)aTag
+- (CPView)viewWithTag:(CPInteger)aTag
 {
     if ([self tag] == aTag)
         return self;
@@ -1183,6 +1190,23 @@ var CPViewFlags                     = { },
     return _isHidden;
 }
 
+- (void)setClipsToBounds:(BOOL)shouldClip
+{
+    if (_clipsToBounds === shouldClip)
+        return;
+
+    _clipsToBounds = shouldClip;
+
+#if PLATFORM(DOM)
+    _DOMElement.style.overflow = _clipsToBounds ? "hidden" :  "visible";
+#endif
+}
+
+- (BOOL)clipsToBounds
+{
+    return _clipsToBounds;
+}
+
 /*!
     Sets the opacity of the receiver. The value must be in the range of 0.0 to 1.0, where 0.0 is 
     completely transparent and 1.0 is completely opaque.
@@ -1307,6 +1331,22 @@ var CPViewFlags                     = { },
 {
     if ([self mouseDownCanMoveWindow])
         [super mouseDown:anEvent];
+}
+
+- (void)rightMouseDown:(CPEvent)anEvent
+{
+    var menu = [self menuForEvent:anEvent];
+    if (menu)
+        [CPMenu popUpContextMenu:menu withEvent:anEvent forView:self];
+    else if ([[self nextResponder] isKindOfClass:CPView])
+        [super rightMouseDown:anEvent];
+    else
+        [[[anEvent window] platformWindow] _propagateContextMenuDOMEvent:YES];
+}
+
+- (CPMenu)menuForEvent:(CPEvent)anEvent
+{
+    return [self menu] || [[self class] defaultMenu];
 }
 
 /*!
