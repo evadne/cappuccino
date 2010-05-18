@@ -96,6 +96,40 @@ var cachedBlackColor,
 }
 
 /*!
+    Creates an opaque color in the RGB color space.
+    Each component should be between the range of 0 to 255.
+    
+    @param red the red component of the color
+    @param green the green component of the color
+    @param blue the blue component of the color
+    @param alpha the alpha component
+    
+    @return a color initialized to the values specified
+*/
++ (CPColor)colorWithWebRed:(int)red green:(int)green blue:(int)blue
+{
+    return [[CPColor alloc] _initWithRGBA:[(red / 255.0), (green / 255.0), (blue / 255.0), 1]];
+}
+
+/*!
+    Creates a color in the RGB color space, with an alpha value.
+    Each component should be between the range of 0 to 255. For
+    the alpha component, a value of 1 is opaque, and 0.0 means
+    completely transparent.
+    
+    @param red the red component of the color
+    @param green the green component of the color
+    @param blue the blue component of the color
+    @param alpha the alpha component
+    
+    @return a color initialized to the values specified
+*/
++ (CPColor)colorWithWebRed:(int)red green:(int)green blue:(int)blue alpha:(float)alpha
+{
+    return [[CPColor alloc] _initWithRGBA:[(red / 255.0), (green / 255.0), (blue / 255.0), alpha]];
+}
+
+/*!
     @deprecated in favor of colorWithRed:green:blue:alpha:
     
     Creates a color in the RGB color space, with an alpha value.
