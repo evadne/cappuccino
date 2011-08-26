@@ -10,7 +10,7 @@ task ("build", function()
 {
     if (executableExists("xcodebuild"))
     {
-        var args = "-sdk macosx -alltargets -configuration Release",
+        var args = "-sdk macosx -alltargets -configuration Release SYMROOT=build",
             supportPath = FILE.join($BUILD_CJS_CAPPUCCINO, "support", applicationName),
             installPath = FILE.join("/", "Applications", applicationName);
 
